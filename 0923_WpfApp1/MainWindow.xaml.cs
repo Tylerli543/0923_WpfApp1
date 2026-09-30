@@ -11,42 +11,56 @@ using System.Windows.Shapes;
 
 namespace _0923_WpfApp1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+       
+        private string dineInOrTakeOut = "未選擇";
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+       
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            var targetTextBox = sender as TextBox;
-            var targetStackPanel = targetTextBox.Parent as StackPanel;
-            var targetNameLabel = targetStackPanel.Children[0] as Label;
-            var targetPriceLabel = targetStackPanel.Children[1] as Label;
-
-            int amount;
-            bool success = int.TryParse(targetTextBox.Text, out amount);
-            if (!success)
+            var radioButton = sender as RadioButton;
+            if (radioButton != null)
             {
-                MessageBox.Show("請輸入正確數值", "輸入錯誤");
-                //targetTextBox.Text = "";
-            }
-            else
-            {
-                string drinkName = targetNameLabel.Content.ToString();
-                int price = Convert.ToInt32(targetPriceLabel.Content.ToString().Substring(0, 2));
-                //MessageBox.Show($"您選擇了 {drinkName}，數量為 {amount}，總價為 {price * amount} 元", "訂購資訊");
-                ResultTextBlock.Text += $"您選擇了 {drinkName}，數量為 {amount}，總價為 {price * amount} 元\n";
+                dineInOrTakeOut = radioButton.Content.ToString();
             }
         }
 
+       
         private void OrderButton_Click(object sender, RoutedEventArgs e)
         {
+            ResultTextBlock.Text = $"【用餐方式】：{dineInOrTakeOut}\n\n";
+            int totalPrice = 0;
 
+            
+            foreach (StackPanel sp in DrinkMenuStackPanel.Children)
+            {
+                
+                CheckBox chkBox = sp.Children[0] as CheckBox;
+                Label priceLabel = sp.Children[1] as Label;
+                Slider slider = sp.Children[2] as Slider;
+
+                
+                if (chkBox.IsChecked == true && slider.Value > 0)
+                {
+                    string drinkName = chkBox.Content.ToString();
+               
+                    int price = Convert.ToInt32(priceLabel.Content.ToString().Replace("元", ""));
+                    int amount = Convert.ToInt32(slider.Value);
+
+                    int subTotal = price * amount;
+                    totalPrice += subTotal;
+
+                    ResultTextBlock.Text += $"您選擇了 {drinkName}，數量為 {amount}，小計：{subTotal} 元\n";
+                }
+            }
+
+            ResultTextBlock.Text += $"\n【總價】：{totalPrice} 元";
         }
     }
 }
